@@ -5,15 +5,19 @@ import entidadesConfig from '../../config/entidades';
 
 class Html {
   // eslint-disable-next-line class-methods-use-this
-  getHtml(_entidade) {
+  getHtml(entidadeID) {
+    console.log(entidadeID);
+    const entidade = entidadesConfig.entidades.find((item) => item.id == entidadeID);
+    console.log(entidade);
+
     // eslint-disable-next-line prefer-const
     let html = fs.readFileSync('./src/app/views/default.html', 'utf8')
-      .replace(/@cnpjEntidade@/g, entidadesConfig.entidades[0].cnpj)
-      .replace(/@enderecoEntidade@/g, entidadesConfig.entidades[0].endereco)
-      .replace(/@nomeEntidade@/g, entidadesConfig.entidades[0].sigla)
-      .replace(/@linkAssinatura@/g, entidadesConfig.entidades[0].linkAssinatura)
-      .replace(/@widthAssinatura@/g, entidadesConfig.entidades[0].widthAssinatura)
-      .replace('@telefoneEntidade@', entidadesConfig.entidades[0].telefone)
+      .replace(/@cnpjEntidade@/g, entidade.cnpj)
+      .replace(/@enderecoEntidade@/g, entidade.endereco)
+      .replace(/@nomeEntidade@/g, entidade.sigla)
+      .replace(/@linkAssinatura@/g, entidade.linkAssinatura)
+      .replace(/@widthAssinatura@/g, entidade.widthAssinatura)
+      .replace('@telefoneEntidade@', entidade.telefone)
       .replace('@diaAtual@', format(
         new Date(),
         'dd',

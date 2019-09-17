@@ -9,14 +9,22 @@ import zipService from '../services/zip';
 
 class PdfController {
   // eslint-disable-next-line class-methods-use-this
-  init(req, res) {
+  async init(req, res) {
     const fileLocation = req.file.path;
+    const entidadeId = req.body.entidade;
+    const entidades = ['1', '2', '3', '4'];
+    console.log(entidades.indexOf(entidadeId));
+    if (entidades.indexOf(entidadeId) === -1 || !req.file) {
+      return res.status(500).json({ error: 'Parâmetros inválidos' });
+    }
+
+
     const fileXlsx = excelService.processExcel(fileLocation);
 
-    console.log(fileXlsx);
+    console.log(req.body);
 
     // eslint-disable-next-line prefer-const
-    let html = htmlService.getHtml(3);
+    let html = htmlService.getHtml(entidadeId);
     const options = { format: 'Letter' };
 
     console.log(html);
@@ -24,7 +32,6 @@ class PdfController {
     // fileXlsx.forEach((item) => {
     // eslint-disable-next-line no-restricted-syntax
     for (const item of fileXlsx) {
-      console.log(item);
       let newHtml = html;
 
       newHtml = newHtml.replace('@artigo@', (item.SEXO === 'Feminino') ? 'a' : 'o')
@@ -39,17 +46,23 @@ class PdfController {
         ));
 
 
-      console.log('continua');
-
-      pdfService.create(newHtml, item.NOME, options);
+      // eslint-disable-next-line no-await-in-loop
+      await pdfService.create(newHtml, item.NOME, options);
       // return res.json({ ok: true });
     }
 
     console.log('terminoou');
 
-    // zipService.create();
+    const zip = zipService.create();
 
-    return res.json({ ok: true });
+
+    res.contentType('application/zip');
+    res.setHeader('content-disposition', 'attachment; filename=teste.zip');
+    // res.att;
+    res.contentType('zip');
+    return res.send(zip);
+
+    // return res.json({ ok: true });
   }
 }
 
