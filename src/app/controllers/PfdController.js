@@ -1,36 +1,53 @@
-import xlsx from 'xlsx';
-import fs from 'fs';
-import pdf from 'html-pdf';
-import zipper from 'zip-local';
+
+import { format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
+
+import excelService from '../services/excel';
+import htmlService from '../services/html';
+import pdfService from '../services/pdf';
+import zipService from '../services/zip';
 
 class PdfController {
+  // eslint-disable-next-line class-methods-use-this
   init(req, res) {
     const fileLocation = req.file.path;
-    const workbook = xlsx.readFile(fileLocation);
-    const sheet_name_list = workbook.SheetNames;
-
-
-    const fileXlsx = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    const fileXlsx = excelService.processExcel(fileLocation);
 
     console.log(fileXlsx);
 
-    const html = fs.readFileSync('./test/teste.html', 'utf8');
+    // eslint-disable-next-line prefer-const
+    let html = htmlService.getHtml(3);
     const options = { format: 'Letter' };
-    const pasta = new Date().getTime();
 
     console.log(html);
 
-    fileXlsx.forEach((item) => {
+    // fileXlsx.forEach((item) => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const item of fileXlsx) {
       console.log(item);
-      const newhtml = html.replace('@NOME', item.Nome);
-      pdf.create(newhtml, options).toFile(`./temp/pdfs/teste/${item.Nome}-${pasta}.pdf`, (err, res) => {
-        if (err) return console.log(err);
-        console.log(res); // { filename: '/app/businesscard.pdf' }
-      });
-    });
+      let newHtml = html;
 
-    zipper.sync.zip('./temp/pdfs/teste/').compress().save('./temp/zips/pack.zip');
+      newHtml = newHtml.replace('@artigo@', (item.SEXO === 'Feminino') ? 'a' : 'o')
+        .replace(/@nomeAssociado@/g, item.NOME)
+        .replace(/@cpfAssociado@/g, item.CPF)
+        .replace(/@dataInclusao@/g, format(
+          item['DATA ASSINATURA'],
+          "dd 'de' MMMM 'de' yyyy",
+          {
+            locale: pt,
+          },
+        ));
 
+
+      console.log('continua');
+
+      pdfService.create(newHtml, item.NOME, options);
+      // return res.json({ ok: true });
+    }
+
+    console.log('terminoou');
+
+    // zipService.create();
 
     return res.json({ ok: true });
   }
