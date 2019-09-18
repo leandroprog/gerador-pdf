@@ -6,6 +6,7 @@ import excelService from '../services/excel';
 import htmlService from '../services/html';
 import pdfService from '../services/pdf';
 import zipService from '../services/zip';
+import entidadesConfig from '../../config/entidades';
 
 class PdfController {
   // eslint-disable-next-line class-methods-use-this
@@ -13,21 +14,22 @@ class PdfController {
     const fileLocation = req.file.path;
     const entidadeId = req.body.entidade;
     const entidades = ['1', '2', '3', '4'];
-    console.log(entidades.indexOf(entidadeId));
+
     if (entidades.indexOf(entidadeId) === -1 || !req.file) {
       return res.status(500).json({ error: 'Parâmetros inválidos' });
     }
 
+    const entidade = entidadesConfig.entidades.find((item) => item.id == entidadeId);
+    const pathPdf = `${entidade.sigla}-${new Date().getTime()}`;
 
-    const fileXlsx = excelService.processExcel(fileLocation);
+    const fileXlsx = excelService.processExcel(fileLocation).filter((item) => !(!item.NOME || !item.CPF || !item['DATA ASSINATURA'] || !item.SEXO));
 
     console.log(req.body);
 
     // eslint-disable-next-line prefer-const
-    let html = htmlService.getHtml(entidadeId);
+    let html = htmlService.getHtml(entidade);
     const options = { format: 'Letter' };
 
-    console.log(html);
 
     // fileXlsx.forEach((item) => {
     // eslint-disable-next-line no-restricted-syntax
@@ -47,20 +49,19 @@ class PdfController {
 
 
       // eslint-disable-next-line no-await-in-loop
-      await pdfService.create(newHtml, item.NOME, options);
-      // return res.json({ ok: true });
+      await pdfService.create(newHtml, item.NOME, item.CPF, pathPdf, options);
     }
 
     console.log('terminoou');
 
-    const zip = zipService.create();
+    const zip = zipService.create(pathPdf);
 
 
     res.contentType('application/zip');
     res.setHeader('content-disposition', 'attachment; filename=teste.zip');
     // res.att;
     res.contentType('zip');
-    return res.send(zip);
+    return res.status(200).send(zip);
 
     // return res.json({ ok: true });
   }

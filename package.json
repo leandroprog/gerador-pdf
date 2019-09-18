@@ -5,7 +5,8 @@
   "author": "Leandro Rocha <prog.leandro@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
   "dependencies": {
     "bluebird": "^3.5.5",

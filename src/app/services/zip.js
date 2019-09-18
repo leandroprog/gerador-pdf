@@ -4,8 +4,8 @@ import zipper from 'zip-local';
 
 class Zip {
   // eslint-disable-next-line class-methods-use-this
-  create() {
-    return zipper.sync.zip('./temp/pdfs/teste/').memory();
+  create(pathPdf) {
+    return zipper.sync.zip(`./temp/pdfs/${pathPdf}/`).memory();
   }
 }
 export default new Zip();
