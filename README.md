@@ -3,6 +3,6 @@
 ## Tarefas
 
 - [x] Ler aquivos xlsx
-- [x] Gerar pdf apartir de um template html
+- [x] Gerar pdf de um template html
 - [x] Zipar os arquivos pdf
-- [ ] Criar um endpoint que recebe um aquivo xlsx
+- [ ] Criar um endpoint que recebe um arquivo xlsx
